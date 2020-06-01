@@ -3,7 +3,7 @@ import { Layout, Avatar, Menu, Icon, Breadcrumb, Button } from 'antd';
 import Title from 'antd/lib/typography/Title';
 const { Header, Footer, Sider, Content } = Layout;
 import SubMenu from 'antd/lib/menu/SubMenu';
-
+import 'antd/dist/antd.css';
 <Layout>
         <Header style={{ padding: 10 }}>
           <Avatar style={{ float: 'right' }} src='./dp.png' />
