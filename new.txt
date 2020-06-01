@@ -2,6 +2,7 @@ import 'antd/dist/antd.css';
 import { Layout, Avatar, Menu, Icon, Breadcrumb, Button } from 'antd';
 import Title from 'antd/lib/typography/Title';
 const { Header, Footer, Sider, Content } = Layout;
+import SubMenu from 'antd/lib/menu/SubMenu';
 
 <Layout>
         <Header style={{ padding: 10 }}>
