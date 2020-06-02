@@ -1,1 +1,13 @@
-# revert_test
+import React, {Component} from 'react';
+import {Redirect} from 'react-router-dom';
+function Protected(props)
+{
+    const Cmp = props.cmp
+    console.log(">>",localStorage.usertoken)
+return <div>{localStorage.usertoken?<Cmp/>: <Redirect to="/login"/>}</div>
+}
+
+export default Protected
+
+
+<Protected cmp={Profile}/>
