@@ -11,3 +11,14 @@ export default Protected
 
 
 <Protected cmp={Profile}/>
+
+
+logOut(e) {
+    e.preventDefault()
+    localStorage.removeItem('usertoken')
+    localStorage.removeItem("UserData")
+    this.props.history.push(`/`)
+  }
+
+
+ <a href="" onClick={this.logOut.bind(this)} className="nav-link">
