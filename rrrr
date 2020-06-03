@@ -1,0 +1,396 @@
+import React, { Component } from "react";
+import Recaptcha from "react-recaptcha";
+import NavBar from "../../Component/NavBar";
+import { userServices } from "../../core/services/userservices";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+class ProviderRegistration extends Component {
+  constructor() {
+    super();
+    this.state = {
+      industry: "-1",
+      provider_name: "",
+      email: "",
+      phone: "",
+      password: "",
+      cnf_password: "",
+      alert: 0,
+      industry_error: "",
+      provider_error: "",
+      email_error: "",
+      phone_error: "",
+      password_error: "",
+      confpass_error: "",
+      isVerified: "",
+    };
+    this.handleSubscribe = this.handleSubscribe.bind(this);
+    this.recaptchaLoaded = this.recaptchaLoaded.bind(this);
+    this.verifyCallback = this.verifyCallback.bind(this);
+
+    this.state = {
+      isVerified: false,
+    };
+    this.onChange = this.onChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  recaptchaLoaded() {
+    console.log("capcha successfully loaded");
+  }
+
+  handleSubscribe() {
+    if (this.state.isVerified) {
+      alert("You have successfully subscribed!");
+    } else {
+      alert("Please verify that you are a human!");
+    }
+  }
+
+  verifyCallback(response) {
+    if (response) {
+      this.setState({
+        isVerified: true,
+      });
+    }
+  }
+
+  notifyB = (msg) => toast.success(msg, { containerId: 1 });
+  notifyA = (data) => toast.error(data, { containerId: 2 });
+
+  onChange(e) {
+    this.setState({ [e.target.name]: e.target.value }, () => {
+      //console.log("provider", this.state.industry);
+    });
+  }
+  validate() {
+    let industry_error = "";
+    let provider_error = "";
+    let email_error = "";
+    let phone_error = "";
+    let password_error = "";
+    let confpass_error = "";
+    if (this.state.industry === "-1") {
+      industry_error = "Please Select industry";
+    }
+    if (!this.state.provider_name) {
+      provider_error = "Please Enter provider name";
+    }
+    if (!this.state.email) {
+      email_error = "Please Enter your email";
+    } else if (!this.state.email.includes("@")) {
+      email_error = "Invalid Email";
+    }
+    if (!this.state.phone) {
+      phone_error = "Please Enter your phone number";
+    } else if (this.state.phone.length < 10) {
+      phone_error = "Invalid phone number";
+    }
+    if (!this.state.password) {
+      password_error = "Please Enter your password";
+    }
+    if (!this.state.cnf_password) {
+      confpass_error = "Please Enter your confirm password";
+    } else if (
+      !(this.state.password.length === this.state.cnf_password.length)
+    ) {
+      confpass_error = "Password not match";
+    }
+
+    if (
+      industry_error ||
+      provider_error ||
+      email_error ||
+      phone_error ||
+      password_error ||
+      confpass_error
+    ) {
+      this.setState({
+        industry_error,
+        provider_error,
+        email_error,
+        phone_error,
+        password_error,
+        confpass_error,
+      });
+      return false;
+    }
+    return true;
+  }
+  onSubmit(e) {
+    e.preventDefault();
+    const isValid = this.validate();
+    if (isValid) {
+      console.log("true");
+      const newUser = {
+        industry: this.state.industry,
+        provider_name: this.state.provider_name,
+        email: this.state.email,
+        phone: this.state.phone,
+        password: this.state.password,
+        cnf_password: this.state.cnf_password,
+      };
+      console.log("ss", newUser);
+      this.notifyB();
+      userServices.register(newUser).then((res) => {
+        console.log("response>>", res);
+        console.log(">>>statsss", res.data.message);
+
+        if (res.status === 200) {
+          this.setState({ alert: 1 });
+          //this.props.history.push(`/`);
+          console.log(">>>ifffffffff", res);
+          this.notifyB(res.data.message);
+        } else {
+          this.setState({ alert: 2 });
+          console.log("else>>");
+          if (res.data.response.data.ValidationFailed) {
+            console.log("ValidationFailed");
+            this.notifyA(res.data.response.data.ValidationFailed);
+          } else if (res.data.response.data.message) {
+            this.notifyA(res.data.response.data.message);
+          }
+
+          //this.props.history.push(`/login`);
+        }
+      });
+      this.setState({
+        industry_error: "",
+        provider_error: "",
+        email_error: "",
+        phone_error: "",
+        password_error: "",
+        confpass_error: "",
+      });
+    } else {
+      console.log("false");
+    }
+  }
+
+  render() {
+    return (
+      <div>
+        <NavBar />
+        <div className="container">
+          <ToastContainer
+            enableMultiContainer
+            containerId={this.state.alert}
+            position={toast.POSITION.TOP_RIGHT}
+          />
+          {/* <ToastContainer
+          enableMultiContainer
+          containerId={"A"}
+          position={toast.POSITION.TOP_RIGHT}
+        /> */}
+          <div className="row">
+            <div className="col-md-6 mt-5 mx-auto">
+              <form noValidate onSubmit={this.onSubmit}>
+                <h1 className="h3 mb-3 font-weight-normal">Register</h1>
+                <div className="form-group">
+                  <div className="row">
+                    <div className="col-md-3 ">
+                      <label htmlFor="name">Industry</label>
+                    </div>
+                    <div className="col-md-9">
+                      <select
+                        className="form-control"
+                        onChange={this.onChange}
+                        name="industry"
+                        value={this.state.industry}
+                      >
+                        <option value="-1">Please Select Industry</option>
+                        <option value="1">Industry1</option>
+                        <option value="2">Industry1</option>
+                      </select>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          marginLeft: "13px",
+                          color: "red",
+                        }}
+                      >
+                        {this.state.industry_error}
+                      </div>
+                      {/* <input
+                  type="text"
+                  className="form-control"
+                  name="first_name"
+                  placeholder="Enter your first name"
+                  value={this.state.first_name}
+                  onChange={this.onChange}
+                /> */}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <div className="row">
+                    <div className="col-md-3 ">
+                      <label htmlFor="name">Provider Name</label>
+                    </div>
+                    <div className="col-md-9">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="provider_name"
+                        placeholder="Enter your provider name"
+                        value={this.state.provider_name}
+                        onChange={this.onChange}
+                      />
+                      <div
+                        style={{
+                          fontSize: 11,
+                          marginLeft: "13px",
+                          color: "red",
+                        }}
+                      >
+                        {this.state.provider_error}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <div className="row">
+                    <div className="col-md-3">
+                      <label htmlFor="email">Email address</label>
+                    </div>
+                    <div className="col-md-9 ">
+                      <input
+                        type="email"
+                        className="form-control"
+                        name="email"
+                        placeholder="Enter email"
+                        value={this.state.email}
+                        onChange={this.onChange}
+                      />
+                      <div
+                        style={{
+                          fontSize: 11,
+                          marginLeft: "13px",
+                          color: "red",
+                        }}
+                      >
+                        {this.state.email_error}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <div className="row">
+                    <div className="col-md-3">
+                      <label htmlFor="phone">Phone</label>
+                    </div>
+                    <div className="col-md-9 ">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="phone"
+                        placeholder="Enter phone"
+                        value={this.state.phone}
+                        onChange={this.onChange}
+                        maxLength="10"
+                      />
+                      <div
+                        style={{
+                          fontSize: 11,
+                          marginLeft: "13px",
+                          color: "red",
+                        }}
+                      >
+                        {this.state.phone_error}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <div className="row">
+                    <div className="col-md-3">
+                      <label htmlFor="password">Password</label>
+                    </div>
+                    <div className="col-md-9">
+                      <input
+                        type="password"
+                        className="form-control"
+                        name="password"
+                        placeholder="Password"
+                        value={this.state.password}
+                        onChange={this.onChange}
+                      />
+                      <div
+                        style={{
+                          fontSize: 11,
+                          marginLeft: "13px",
+                          color: "red",
+                        }}
+                      >
+                        {this.state.password_error}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <div className="row">
+                    <div className="col-md-3">
+                      <label htmlFor="password">Conf Password</label>
+                    </div>
+                    <div className="col-md-9">
+                      <input
+                        type="password"
+                        className="form-control"
+                        name="cnf_password"
+                        placeholder="Confirm Password"
+                        value={this.state.cnf_password}
+                        onChange={this.onChange}
+                      />
+                      <div
+                        style={{
+                          fontSize: 11,
+                          marginLeft: "13px",
+                          color: "red",
+                        }}
+                      >
+                        {this.state.confpass_error}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <div className="row">
+                    <div className="col-md-3">
+                      {/* <label htmlFor="password">Conf Password</label> */}
+                    </div>
+                    <div className="col-md-9">
+                      <Recaptcha
+                        sitekey="6LfTolwUAAAAAJ16pnJ1qBgXKlzGeKXRsCMRXllK"
+                        render="explicit"
+                        onloadCallback={this.recaptchaLoaded}
+                        verifyCallback={this.verifyCallback}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-5"></div>
+                  <div className="col-md-4">
+                    <button
+                      type="submit"
+                      className="btn btn-lg btn-primary btn-block"
+                    >
+                      Register!
+                    </button>
+                    <br />
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default ProviderRegistration;
