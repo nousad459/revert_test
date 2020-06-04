@@ -1,0 +1,19 @@
+public async fetchUser() {
+        const user = window.localStorage.getItem("r4LoginResults");
+        var token = JSON.parse(user).token;
+        const res = await fetch(this.baseUrl+'admin/user/', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-type': 'application/json',
+                    'Authorization': 'Token '+token
+                },
+                /*body: JSON.stringify({
+                    username: '{userName}',
+                    password: '{password}'
+                })*/
+            });
+          const data = await res.json()
+          //console.log("recorddata",data)   
+          this.setState({userrecord: data, loading:false})
+ }
