@@ -1,0 +1,134 @@
+import React, { Component } from "react";
+import { getCookie } from "../utils/cookies";
+import { Redirect } from "react-router-dom";
+import { Table, Avatar, Pagination } from "antd";
+
+const columns = [
+  {
+    title: "Id",
+    dataIndex: "id",
+    key: "id",
+  },
+  {
+    title: "First Name",
+    dataIndex: "first_name",
+    key: "first_name",
+  },
+  {
+    title: "Last Name",
+    dataIndex: "last_name",
+    key: "last_name",
+  },
+  {
+    title: "Email",
+    dataIndex: "email",
+    key: "email",
+  },
+  {
+    title: "Profile",
+    dataIndex: "avatar",
+    key: "avatar",
+    render: (url) => <Avatar src={url} />,
+  },
+];
+class DashboardPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: [],
+      value: "",
+      totalPage: 1,
+    };
+  }
+
+  componentDidMount() {
+    this.fetchData(1);
+  }
+
+  onChange = (pageNumber) => {
+    this.fetchData(pageNumber);
+  };
+  fetchData = async (pageNumber) => {
+    try {
+      await fetch("https://reqres.in/api/users?page=" + pageNumber)
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          this.setState({ data: res.data, totalPage: res.total });
+        });
+    } catch (error) {
+      return error;
+    }
+  };
+
+  searchValue = (e) => {
+    this.setState({ value: e.target.value });
+  };
+
+  render() {
+    const isCookie = getCookie("token");
+    return (
+      <div>
+        {isCookie ? <div>Hello</div> : <Redirect to="/" />}
+        <div style={{ padding: "50px 50px" }}>
+          Search
+          <input type="text" onChange={(e) => this.searchValue(e)} />
+          {/* <table>
+            <tr>
+              <td>Id</td>
+              <td>First Name</td>
+              <td>Last Name</td>
+              <td>Email</td>
+            </tr>
+
+            {this.state.data
+              .filter(
+                (data) =>
+                  !this.state.value ||
+                  data.first_name.toLowerCase() === this.state.value ||
+                  data.id === parseInt(this.state.value)||
+                  data.first_name.toLowerCase().includes(this.state.value)
+              )
+              .map((data, i) => {
+                return (
+                  <tr key={i}>
+                    <td>{data.id}</td>
+                    <td>{data.first_name}</td>
+                    <td>{data.last_name}</td>
+                    <td>{data.email}</td>
+                  </tr>
+                );
+              })}
+          </table> */}
+          <br /> <br />
+          <Table
+            columns={columns}
+            dataSource={
+              this.state.data
+                ? this.state.data.filter(
+                    (data) =>
+                      !this.state.value ||
+                      data.first_name.toLowerCase() ===
+                        this.state.value.toLowerCase() ||
+                      data.id === parseInt(this.state.value) ||
+                      data.first_name.toLowerCase().includes(this.state.value)
+                  )
+                : ""
+            }
+            pagination={false}
+          />
+          <br />
+          <Pagination
+            defaultCurrent={1}
+            total={this.state.totalPage}
+            onChange={this.onChange}
+          />
+          {/* <button>Ok</button> */}
+        </div>
+      </div>
+    );
+  }
+}
+
+export default DashboardPage;
